@@ -27,6 +27,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            //trocar apos atualização do pring
+            //Bloqueio de conexao nao segura
+            .requiresChannel(channel -> 
+                channel.anyRequest().requiresSecure()
+            )
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .headers(headers -> headers.frameOptions().disable())
