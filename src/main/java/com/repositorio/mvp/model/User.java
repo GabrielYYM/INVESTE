@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,6 +26,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import com.repositorio.mvp.config.MfaSecretConverter;
 
 @Entity
 @Table(name = "TB_USER")
@@ -64,7 +67,8 @@ public class User implements UserDetails{
     @Column(nullable = false)
     private boolean mfaEnabled = false;
 
-    @Column(length = 32)
+    @Convert(converter = MfaSecretConverter.class)
+    @Column(length = 255)
     private String mfaSecret;
 
     public User(String name, String email, String password, UserRole role){
