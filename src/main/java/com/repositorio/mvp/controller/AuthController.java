@@ -112,6 +112,19 @@ public class AuthController {
         }
     }
  
+    //POST /api/auth/register
+    @PostMapping("/register")
+    public ResponseEntity register(@RequestBody @Valid RegisterDTO data){
+        if(this.repository.findByEmail(data.email()) != null) return ResponseEntity.badRequest().build();
+
+        String encryptedPassword = passwordEncoder.encode(data.password());
+        System.out.println("Hash gerado com sucesso HASH");
+        User newUser = new User(data.name(), data.email(), encryptedPassword, UserRole.USER);
+        this.repository.save(newUser);
+
+        return ResponseEntity.ok().build();
+    }  
+
     //POST /api/auth/logout
     @PostMapping("/logout")
     public ResponseEntity logout(HttpServletRequest request){
