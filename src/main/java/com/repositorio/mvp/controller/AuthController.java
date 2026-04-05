@@ -3,6 +3,7 @@ package com.repositorio.mvp.controller;
 import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -64,6 +65,7 @@ public class AuthController {
 
         int delay = Math.min(attempts, 6);
         System.out.println("Ip está bloqueado");
+        //Verificação de Bloqueio de IP
         if (loginAttemptService.isBlocked(ip)) {
             return ResponseEntity.status(429).body("IP temporarily blocked due to too many failed attempts");
         }
@@ -76,7 +78,7 @@ public class AuthController {
                 Thread.currentThread().interrupt();
             }
         }
-
+        //MFA
         try {
             var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
             var auth = this.authenticationManager.authenticate(usernamePassword);
@@ -106,22 +108,10 @@ public class AuthController {
 
         } catch (Exception e) {
             loginAttemptService.loginFailed(ip);
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(500).body("An unexpected error occurred.");
         }
     }
-
-    //POST /api/auth/register
-    @PostMapping("/register")
-    public ResponseEntity register(@RequestBody @Valid RegisterDTO data){
-        if(this.repository.findByEmail(data.email()) != null) return ResponseEntity.badRequest().build();
-
-        String encryptedPassword = passwordEncoder.encode(data.password());
-        System.out.println("Hash gerado com sucesso HASH");
-        User newUser = new User(data.name(), data.email(), encryptedPassword, UserRole.USER);
-        this.repository.save(newUser);
-
-        return ResponseEntity.ok().build();
-    }    
+ 
     //POST /api/auth/logout
     @PostMapping("/logout")
     public ResponseEntity logout(HttpServletRequest request){
